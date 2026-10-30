@@ -1,11 +1,9 @@
 import React, { useContext } from "react";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { Bounce } from "react-toastify";
-import { AppContext } from "../../context/AppContext";
-import { useParams } from "react-router-dom";
-
-const EditMenu = () => {
+import { AppContext } from "./../../context/AppContext";
+import socket from "../../socket/socket";
+const AddMenu = () => {
   const { axios, navigate, loading, setLoading, categories , getAllMenu } =
     useContext(AppContext);
   const [file, setFile] = useState(null);
@@ -14,8 +12,6 @@ const EditMenu = () => {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  const { id } = useParams();
-  const [editLoading, setEditLoading] = useState(false);
   const fileHandler = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -27,36 +23,26 @@ const EditMenu = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      setEditLoading(true);
+      setLoading(true);
       const formData = new FormData();
-      if(file){
-        formData.append("image", file);
-      }
-      if(name){
-        formData.append("name", name);
-      }
-      if(price){
-        formData.append("price", price);
-      }
-      if(description){
-        formData.append("description", description);
-      }
-      if(category){
-        formData.append("category", category);
-      }
-     
-      const res = await axios.put(`/menu/update/${id}`, formData);
+      formData.append("image", file);
+      formData.append("name", name);
+      formData.append("price", price);
+      formData.append("description", description);
+      formData.append("category", category);
+      const res = await axios.post("/menu/add", formData);
       if (res.data.success) {
         toast.success(res.data.message);
 
-        getAllMenu(); // 👈 menus dobara fetch
+        await getAllMenu(); // 👈 menus dobara fetch
+        socket.emit("MenuAdd","Menu is added")
         navigate("/admin/menus");
       }
     } catch (error) {
       console.log(error);
     }
     finally {
-      setEditLoading(false);
+      setLoading(false);
     }
   };
 
@@ -70,7 +56,7 @@ const EditMenu = () => {
             name="name"
             onChange={(e) => setName(e.target.value)}
             placeholder="Menu Name"
-            
+            required
             className="p-2 border border-2 border-amber-400/30 rounded-xl hover:border-amber-400/50 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
           />
           <label
@@ -91,7 +77,7 @@ const EditMenu = () => {
               accept="image/*"
               onChange={fileHandler}
               className="hidden"
-             
+              required
             />
           </label>
           <input
@@ -99,7 +85,7 @@ const EditMenu = () => {
             name="price"
             onChange={(e) => setPrice(e.target.value)}
             placeholder="Enter the Price Value"
-           
+            required
             className="p-2 border border-2 mt-5 border-amber-400/30 rounded-xl hover:border-amber-400/50 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
           />
           <div className="mt-5">
@@ -110,7 +96,7 @@ const EditMenu = () => {
             <select
               name="category"
               value={category}
-              
+              required
               onChange={(e) => setCategory(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl 
                outline-none focus:ring-2 focus:ring-amber-400 
@@ -130,7 +116,7 @@ const EditMenu = () => {
             name="description"
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter the Description"
-          
+            required
             className="p-2 mt-5 border border-2 border-amber-400/30 rounded-xl hover:border-amber-400/50 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
           />
           {preview && (
@@ -169,4 +155,4 @@ const EditMenu = () => {
   );
 };
 
-export default EditMenu;
+export default AddMenu;

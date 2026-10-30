@@ -147,13 +147,21 @@ const Cart = () => {
             <span>Total</span>
             <span>₹{TotalAmount}</span>
           </div>
-
-          <button
+          {
+             allCarts?.items ? <button
             onClick={handleCheckOut}
             className="block w-full text-center bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
           >
             Proceed to Checkout
+          </button> : <button
+            onClick={handleCheckOut}
+            disabled
+            className="block w-full text-center bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            Proceed to Checkout
           </button>
+          }
+          
         </div>
       </Box>
     </Drawer>

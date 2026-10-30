@@ -9,7 +9,7 @@ import {
 import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { Bounce } from "react-toastify";
-
+import socket from "../../socket/socket.jsx"
 const Categories = () => {
   const { axios, navigate ,categories,setCategories,getAllCategory} = useContext(AppContext);
   
@@ -17,22 +17,32 @@ const Categories = () => {
 
   // Get all categories
 
+  useEffect(() => {
+  const handleCategoryAdd = () => {
+    getAllCategory();
+  };
+
+  socket.on("CategoryAdd", handleCategoryAdd);
+
+  return () => {
+    socket.off("CategoryAdd", handleCategoryAdd);
+  };
+}, []);
+
 
  
   // Delete category
 const deleteCategory = async (id) => {
   try {
     const res = await axios.delete(`/category/delete/${id}`);
-
-    console.log("DELETE RESPONSE:", res.data);
-
     if (res.data.success) {
       // UI se immediately remove
       setCategories((prev) =>
         prev.filter((category) => String(category._id) !== String(id))
       );
-
+      socket.emit("Deleted", "Item Deleted Successfully");
       toast.success(res.data.message);
+      
     }
   } catch (error) {
     console.log("DELETE ERROR:", error);
@@ -42,6 +52,9 @@ const deleteCategory = async (id) => {
     );
   }
 };
+
+
+
 
   return (
     <>

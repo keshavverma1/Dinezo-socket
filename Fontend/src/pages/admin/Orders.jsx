@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../context/AppContext";
 import { Bounce } from "react-toastify";
 import { toast, ToastContainer } from "react-toastify";
+import socket from "../../socket/socket.jsx";
 
 const AllOrders = () => {
 
@@ -33,6 +34,7 @@ const AllOrders = () => {
             : order
         )
       );
+      socket.emit("statusupdate","status is updated")
 
       toast.success(res.data.message);
     }

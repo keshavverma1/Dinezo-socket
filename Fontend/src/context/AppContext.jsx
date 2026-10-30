@@ -1,14 +1,15 @@
 import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import socket from "../socket/socket.jsx";
 import axios from "axios";
 import { toast } from "react-toastify";
-axios.defaults.baseURL = "https://restaurant-app-sigma-sooty.vercel.app";
+axios.defaults.baseURL = "http://localhost:4000";
 axios.defaults.withCredentials = true;
 export const AppContext = createContext();
 
 const AppContextProvider = ({ children }) => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [bookings, setAllBookings] = useState([]);
   const [user, setUser] = useState(null);
   const [allOrders, setAllOrders] = useState([]);
@@ -101,6 +102,34 @@ const AppContextProvider = ({ children }) => {
     }
   };
 
+
+useEffect(() => {
+  const fetchorders = () => {
+    getMyOrders();
+  };
+
+  socket.on("AddOrder", fetchorders);
+
+  return () => {
+    socket.off("AddOrder", fetchorders);
+
+  };
+}, []);
+useEffect(() => {
+  const fetchorders = () => {
+   fetchOrders();
+  };
+
+  socket.on("AddOrder", fetchorders);
+
+  return () => {
+    socket.off("AddOrder", fetchorders);
+
+  };
+}, []);
+
+
+
   // =========================
   // GET ALL BOOKINGS
   // =========================
@@ -129,23 +158,25 @@ const AppContextProvider = ({ children }) => {
     setOpen(value);
   };
 
-  //Carts Section
-  const handleCart = async (menuItemId, quantity) => {
-    try {
-      const updateCart = await axios.post("/cart/add", {
-        menuItemId,
-        quantity,
-      });
-      if (updateCart.data.success) {
-        fetchAllCarts();
-        setOpen(true);
-      } else {
-        console.log(updateCart.data.message);
-      }
-    } catch (error) {
-      console.log(error);
+
+const handleCart = async (menuItemId, quantity) => {
+  try {
+    const updateCart = await axios.post("/cart/add", {
+      menuItemId,
+      quantity,
+    });
+
+    if (updateCart.data.success) {
+      await fetchAllCarts();
+      setOpen(true);
+    } else {
+      console.log(updateCart.data.message);
     }
-  };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
   const [allCarts, setAllCarts] = useState();
 
   const fetchAllCarts = async () => {
@@ -205,17 +236,79 @@ const AppContextProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      getMyOrders();
-    }
-  }, [user]);
+useEffect(() => {
+  if (user) {
+    getMyOrders();
+  }
+
+  const fetchorders = () => {
+    getMyOrders();
+  };
+
+  socket.on("statusupdate", fetchorders);
+
+  return () => {
+    socket.off("statusupdate", fetchorders);
+  };
+}, [user]);
 
   useEffect(() => {
     isAuth();
     getAllCategory();
     getAllMenu();
   }, []);
+
+  //Update Category
+useEffect(() => {
+  const handleCategoryAdd = () => {
+    getAllCategory();
+  };
+
+  socket.on("updatecategory", handleCategoryAdd);
+
+  return () => {
+    socket.off("updatecategory", handleCategoryAdd);
+  };
+}, []);
+
+  //update menu socket or menu delete
+
+  useEffect(() => {
+    socket.on("Menu Dashboard", () => {
+      getAllMenu();
+    });
+
+    return () => {
+      socket.off("Menu Dashboard");
+    };
+  }, []);
+
+  //Update category Socket
+  useEffect(() => {
+    const handleUpdate = () => {
+      console.log("Update Dashboard received");
+      getAllCategory();
+    };
+
+    socket.on("Update Dashboard", handleUpdate);
+
+    return () => {
+      socket.off("Update Dashboard", handleUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+  const refreshMenus = () => getAllMenu();
+
+  socket.on("MenuAdd", refreshMenus);
+  socket.on("UpdatedMenu", refreshMenus);
+
+  return () => {
+    socket.off("MenuAdd", refreshMenus);
+    socket.off("UpdatedMenu", refreshMenus);
+  };
+}, []);
+
   useEffect(() => {
     console.log("ADMIN CHANGED:", admin);
 

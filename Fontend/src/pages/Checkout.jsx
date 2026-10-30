@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
-
+import socket from "../socket/socket";
 const Checkout = () => {
   const { axios, allCarts, fetchAllCarts, setLoading, loading } =
     useContext(AppContext);
@@ -24,6 +24,7 @@ const Checkout = () => {
       const res = await axios.post("/order/place",{address});
       if(res.data.success){
         fetchAllCarts();
+        socket.emit("AddOrder","Order is Adding")
         navigate("/my-orders");
       }
     } catch (error) {

@@ -3,25 +3,86 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDatabase from "./config/mongoconnect.js";
 import cookieParser from "cookie-parser";
-//Configuring Environment Variables
+
+import http from "http";
+import { Server } from "socket.io";
+// Configuring Environment Variables
 dotenv.config();
+
 const app = express();
-//Port of Server
+const server = http.createServer(app);
 
+// Port of Server
+const PORT = process.env.PORT || 4000;
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,
+  },
+});
 
-
-
-//Middlewares
+// Express API CORS
 app.use(
   cors({
-    origin: "https://dinezo.online",
+    origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  //Socket for Delete Category
+  socket.on("Deleted", (message) => {
+    console.log("Deleted received:", message);
+    io.emit("Update Dashboard");
+  });
+
+  //Socket for delete menu
+  socket.on("MenuDelete", (message) => {
+    console.log("Menu Dekete Recieved", message);
+    io.emit("Menu Dashboard");
+  });
+
+  socket.on("CategoryAdd", (message) => {
+    console.log(message);
+    io.emit("CategoryAdd");
+  });
+
+  socket.on("updatecategory", (message) => {
+    console.log(message);
+    io.emit("updatecategory");
+  });
+
+  socket.on("MenuAdd", (message) => {
+    console.log(message);
+    io.emit("MenuAdd");
+  });
+
+  socket.on("UpdatedMenu", (message) => {
+    console.log(message);
+    io.emit("UpdatedMenu");
+  });
+
+  socket.on("AddOrder",(message)=>{
+    console.log(message)
+    io.emit("AddOrder")
+  })
+
+  socket.on("statusupdate",(message)=>{
+    console.log(message)
+    io.emit("statusupdate")
+  })
+
+});
+
 // Parse JSON data sent by the client into a JavaScript object.
 app.use(express.json());
+
 app.use(cookieParser());
+
 app.use(express.urlencoded({ extended: true }));
+
 app.use(async (req, res, next) => {
   try {
     await connectDatabase();
@@ -35,7 +96,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-//Routes
+// Routes
 app.get("/", (req, res) => {
   res.send("Server is Running");
 });
@@ -57,5 +118,10 @@ app.use("/order", orderRouter);
 
 import bookingRouter from "./routes/bookingRoutes.js";
 app.use("/booking", bookingRouter);
+
+// Start Server
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 export default app;

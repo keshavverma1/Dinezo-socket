@@ -1,10 +1,22 @@
-import React, { useContext } from "react";
+import React, { useContext ,useEffect } from "react";
 import { AppContext } from "../context/AppContext";
 import { Link } from "react-router-dom";
 import { FiArrowRight, FiStar, FiShoppingBag } from "react-icons/fi";
-
+import socket from "../socket/socket.jsx"
 const Home = () => {
-  const { categories, menus, handleCart, user,navigate } = useContext(AppContext);
+  const { categories, menus, handleCart, user,navigate ,getAllCategory } = useContext(AppContext);
+
+    useEffect(() => {
+    const handleCategoryAdd = () => {
+      getAllCategory();
+    };
+
+    socket.on("CategoryAdd", handleCategoryAdd);
+
+    return () => {
+      socket.off("CategoryAdd", handleCategoryAdd);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-gray-900">

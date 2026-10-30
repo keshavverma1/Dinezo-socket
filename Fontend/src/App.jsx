@@ -27,26 +27,62 @@ import EditMenu from "./pages/admin/EditMenu.jsx";
 import AllOrders from "./pages/admin/Orders.jsx";
 import Booking from "./pages/admin/Booking.jsx";
 import Cart from "./pages/Cart.jsx";
+import Loading from "./components/Loading.jsx";
+import socket from "./socket/socket.jsx"
+
+import {  useRef } from "react";
+
 
 function App() {
   const adminPath = useLocation().pathname.includes("admin");
   const loginPath = useLocation().pathname.includes("login");
   const signupPath = useLocation().pathname.includes("signup");
-  const { admin, setAdmin } = useContext(AppContext);
-  const ScrollToTop = () => {
-    const { pathname } = useLocation();
-    useEffect(() => {
+  const { admin, setAdmin ,  } = useContext(AppContext);
+    const [loading, setLoading] = useState(true);
+
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  const previousPath = useRef(pathname);
+
+  useEffect(() => {
+    // Sirf actual route change par scroll top karo
+    if (previousPath.current !== pathname) {
       window.scrollTo({
         top: 0,
         left: 0,
         behavior: "smooth",
-      })
-    }, [pathname]);
-    return null;
-  }
+      });
+
+      previousPath.current = pathname;
+    }
+  }, [pathname]);
+
+  return null;
+};
+
+useEffect(() => {
+  socket.on("connect", () => {
+    console.log("Connected:", socket.id);
+
+    socket.emit("frontendMessage", "Frontend started");
+  });
+  return () => {
+    socket.off("connect");
+  };
+}, []);
+
+  useEffect(()=>{
+    setTimeout(()=>{
+       setLoading(false);
+    },3000)
+  },[])
+
   return (
     <>
-   
+      {
+        loading ? <Loading></Loading> : ""
+      }
       <ScrollToTop></ScrollToTop>
       <section>
         {!adminPath && <NavBar></NavBar>}

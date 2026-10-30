@@ -1,17 +1,17 @@
 import React from "react";
+
 import { useContext } from "react";
 import { AppContext } from "../../context/AppContext";
 import { toast } from "react-toastify";
 import { Bounce } from "react-toastify";
 import { ToastContainer } from "react-toastify";
-import { useParams } from "react-router-dom";
-import { useState } from "react";
-const EditCategories = () => {
-  const { axios, navigate, loading, setLoading ,setCategories ,getAllCategory } = useContext(AppContext);
+import socket from "../../socket/socket";
+const AddCategory = () => {
+  const { axios, loading, setLoading, getAllCategory ,navigate} =
+    useContext(AppContext);
+  const [name, setName] = React.useState("");
   const [file, setFile] = React.useState(null);
   const [preview, setPreview] = React.useState(null);
-  const [categoryLoading, setCategoryLoading] = useState(false);
-      const {id} = useParams();
 
   const fileHandler = (e) => {
     const selectedFile = e.target.files[0];
@@ -21,49 +21,56 @@ const EditCategories = () => {
       setPreview(URL.createObjectURL(selectedFile));
     }
   };
+
+
 const handleSubmit = async (e) => {
   e.preventDefault();
 
   try {
-    setCategoryLoading(true);
+    setLoading(true);
 
     const formData = new FormData();
-
-    if (file) {
-      formData.append("image", file);
-    }
-
+    formData.append("image", file);
     formData.append("name", e.target.name.value);
 
-    console.log("ID:", id);
-    console.log("NAME:", e.target.name.value);
-
-    const res = await axios.put(
-      `/category/update/${id}`,
-      formData
-    );
-
-    console.log("UPDATE RESPONSE:", res.data);
+    const res = await axios.post("/category/add", formData);
 
     if (res.data.success) {
-      toast.success(res.data.message);
+     toast.success(res.data.message, {
+  position: "bottom-right",
+  autoClose: 3000,
+  theme: "dark",
+  transition: Bounce,
+  closeOnClick: true,
+  pauseOnHover: false,
+  pauseOnFocusLoss: false,
+  hideProgressBar: false,
+  draggable: false,
+});
+    
 
-      // Context ki categories ko fresh data do
-      getAllCategory();
+      // Socket event
+      socket.emit("CategoryAdd", "Category is Add");
 
-      // Phir categories page par jao
+      // Form reset
+      setFile(null);
+      setPreview(null);
+      e.target.reset();
+
+      // Navigate immediately
       navigate("/admin/categories");
+
+      // Categories refresh
+      getAllCategory().catch(console.error);
     }
   } catch (error) {
-    console.log("UPDATE ERROR:", error);
-
-    toast.error(
-      error?.response?.data?.message || "Failed to update category"
-    );
+    console.log(error);
+    toast.error(error?.response?.data?.message || "Something went wrong");
   } finally {
-    setCategoryLoading(false);
+    setLoading(false);
   }
 };
+
   return (
     <>
       <ToastContainer position="bottom-right" autoClose={5000} theme="dark" />
@@ -73,7 +80,6 @@ const handleSubmit = async (e) => {
             type="text"
             name="name"
             onChange={(e) => e.target.value}
-           
             placeholder="Category Name"
             required
             className="p-2 border border-2 border-amber-400/30 rounded-xl hover:border-amber-400/50 focus:outline-none focus:ring-2 focus:ring-amber-400/50"
@@ -96,7 +102,7 @@ const handleSubmit = async (e) => {
               accept="image/*"
               onChange={fileHandler}
               className="hidden"
-           
+              required
             />
           </label>
           {preview && (
@@ -135,4 +141,4 @@ const handleSubmit = async (e) => {
   );
 };
 
-export default EditCategories;
+export default AddCategory;

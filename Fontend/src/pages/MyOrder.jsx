@@ -1,11 +1,12 @@
 import React from "react";
 import { AppContext } from "./../context/AppContext";
-
+import socket from "../socket/socket.jsx";
+import { useEffect } from "react";
 const MyOrder = () => {
-  const { orders, setAllOrder, navigate, loading, user } =
+  const { orders, setAllOrder, navigate, loading, user ,fetchOrders } =
     React.useContext(AppContext);
   // Dummy data - baad mein API se replace kar dena
- 
+
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10">
