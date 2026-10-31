@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import connectDatabase from "./config/mongoconnect.js";
 import cookieParser from "cookie-parser";
@@ -14,20 +13,7 @@ const server = http.createServer(app);
 
 // Port of Server
 const PORT = process.env.PORT || 4000;
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
-  },
-});
-
-// Express API CORS
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  }),
-);
+const io = new Server(server)
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
@@ -120,8 +106,9 @@ import bookingRouter from "./routes/bookingRoutes.js";
 app.use("/booking", bookingRouter);
 
 // Start Server
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 
 export default app;
