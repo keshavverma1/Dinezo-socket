@@ -31,7 +31,7 @@ const Home = () => {
             <div>
               <span className="inline-flex items-center gap-2 bg-amber-300/10 border border-amber-300/20 text-amber-300 px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <FiStar />
-                Delicious food, delivered with love
+                Delicious foody, delivered with love
               </span>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight">
