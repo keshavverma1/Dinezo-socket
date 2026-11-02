@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import socket from "../socket/socket.jsx";
 import axios from "axios";
 import { toast } from "react-toastify";
-axios.defaults.baseURL = "http://localhost:4000";
+axios.defaults.baseURL = "";
 axios.defaults.withCredentials = true;
 export const AppContext = createContext();
 

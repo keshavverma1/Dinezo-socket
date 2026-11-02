@@ -8,8 +8,8 @@ const generateToken = (res, payload) => {
   });
 res.cookie("token", generatedToken, {
   httpOnly: true,
-  secure: true,
-  sameSite: "none",
+  secure: false,
+  sameSite: "lax",
   path: "/",
   maxAge: 30 * 24 * 60 * 60 * 1000,
 });
@@ -138,8 +138,8 @@ const adminLogin = async (req, res) => {
     });
 res.cookie("Admintoken", token, {
   httpOnly: true,
-  secure: true,
-  sameSite: "none",
+  secure: false,
+  sameSite: "lax",
   path: "/",
   maxAge: 30 * 24 * 60 * 60 * 1000,
 });
