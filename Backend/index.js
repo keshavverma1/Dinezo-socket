@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import connectDatabase from "./config/mongoconnect.js";
 import cookieParser from "cookie-parser";
+import client from "@prometheus-io/client";
 
 import http from "http";
 import { Server } from "socket.io";
@@ -11,7 +12,10 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// Port of Server
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({register: client.register});
+
+
 const PORT = process.env.PORT || 4000;
 const io = new Server(server)
 
@@ -68,6 +72,18 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: true }));
+
+
+app.get("/metrics", async (req, res) => {
+  try {
+    res.set("Content-Type", client.register.contentType);
+    res.end(await client.register.metrics());
+  }
+  catch (err) {
+    res.status(500).end(err);
+  }
+});
+
 
 app.use(async (req, res, next) => {
   try {
